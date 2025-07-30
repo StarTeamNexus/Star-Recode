@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Build Selector</title>
+    <style>
+        @keyframes starlogo {
+            from {transform: rotate(0deg);}
+            to {transform: rotate(360deg);}
+        }
+        * {
+            text-align: center;
+            color: white;
+            font-size: 30px;
+        }
+        body {
+            background-color: #333;
+        }
+        #staricon {
+        animation-name: starlogo;
+        animation-duration: 5s;
+        animation-iteration-count: infinite;
+        }
+        #title {
+            text-align: center;
+        }
+        #BuildSS,#BuildS,#BuildUS {
+            background-color: darkslateblue;
+            border: solid 10px whitesmoke;
+            margin: 30px;
+            padding: 0%;
+            margin-left: 30px;
+        }
+    </style>
+</head>
+<body>
+<img id="staricon" src="https://github.com/StarTeamNexus/Star-v2/blob/main/Star.png?raw=true" alt="The Logo for Star-v2" />
+<h1 id="title">Star</h1>  
+<h3 id="title">Select your Build</h3>
+<div id="BuildSS">
+<h1>Secured Stable</h1>
+<h2>A very Stable of Star but not very Up to Date</h2>
+</div>
+<div id="BuildS">
+<h1>Stable</h1>
+<h2>The Best Version of Star if you want to avoid any issues</h2>
+</div>
+<div id="BuildUS">
+<h1>Unstable</h1>
+<h2>The Latest Version of Star but might contain Issues</h2>
+</div>
+</body>
+</html>
