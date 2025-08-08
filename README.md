@@ -16,4 +16,15 @@ This is A Testing Version of Star and might not work great<br />
 Star Recoded just for you :) - Sap<br />
 Made with Love from the LmMath/Star/Zenex Team, which is only Sap :skull:
 
+Update Plans<br />
+X = This is likely not to be added and scrapped from the update plans<br />
+V = Planned to be made and added into a later build<br />
+- [x] = Made and finished but not released to the public, and then gets removed when released<br />
 
+Planned Updates
+- [ V ] Release by August 20
+- [ V ] Make Star work
+- [ X ] Add Multigame lists - Gonna be made with AI, so it might not be made it will be added when I learn some JS \:skull:
+- [ V ] Improve the Build Selector
+- [ V ] Ensure everything works
+- [ V ] Make a Discord
