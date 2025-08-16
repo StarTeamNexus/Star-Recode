@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #fff;
+            --accent-color: #3498db;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .error-container {
+            max-width: 600px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        h1 {
+            font-size: 8rem;
+            margin-bottom: 0;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px var(--shadow-color);
+            animation: pulse 2s infinite;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .home-button {
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px var(--shadow-color);
+            background-color: #2980b9;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 6rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            p {
+                font-size: 1rem;
+            }
+        }
+
+        .error-details {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+
+        .error-details span {
+            display: block;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1>404</h1>
+        <h2>Page Not Found</h2>
+        <p>Oops! The page you're looking for seems to have vanished into the digital void.</p>
+        <a href="/index.html" class="home-button">Return Home</a>
+        
+        <div class="error-details">
+            <span>Error:Page not found</span>
+            <span>Made by Sap :D</span>
+            <span>Path: <script>document.write(window.location.pathname)</script></span>
+        </div>
+    </div>
+</body>
+</html>
