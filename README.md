@@ -22,9 +22,10 @@ V = Planned to be made and added into a later build<br />
 - [x] = Made and finished but not released to the public, and then gets removed when released<br />
 
 Planned Updates
+- [ V ] Rewrite the Following files since they are made with AI Antitamper, SimpleAntitamper, and 404.html
 - [ V ] Release by August 20
 - [ V ] Make Star work
-- [ X ] Add Multigame lists - Gonna be made with AI, so it might not be made it will be added when I learn some JS \:skull:
+- [ X ] Add Multigame lists - Gonna be made with AI, so it might not be made, it will be added when I learn some JS \:skull:
 - [ V ] Improve the Build Selector
 - [ V ] Ensure everything works
 - [ V ] Make a Discord
