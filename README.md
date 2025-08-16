@@ -1,7 +1,7 @@
 # Star
 A Simple, Fast, and Easy Unblocked Gaming Site<br />
 **<br />Please Note the Following<br />
-This Project was fully custom-made with no AI, but AI was used to help create some parts of the code/AI was used to help make stuff and will be credited within the code<br />
+This Project was fully custom-made with no AI, but AI was used to help create some parts of the code/AI was used to help make stuff and will be credited within the code. The Code also might be fully AI but will be reworked<br />
 This Was Made Multiple Times in the past, so this might not be great. This is likely not the final product<br />
 This Was Made with little to no experience with HTML, CSS, and JS<br />
 This Site might not be good or great as it is still in the works<br />
@@ -22,7 +22,7 @@ V = Planned to be made and added into a later build<br />
 - [x] = Made and finished but not released to the public, and then gets removed when released<br />
 
 Planned Updates
-- [ V ] Rewrite the Following files since they are made with AI Antitamper, SimpleAntitamper, and 404.html
+- [ V ] Rewrite the Following files since they are made with AI Antitamper, SimpleAntitamper, 404.html, config, and games
 - [ V ] Release by August 20
 - [ V ] Make Star work
 - [ X ] Add Multigame lists - Gonna be made with AI, so it might not be made, it will be added when I learn some JS \:skull:
