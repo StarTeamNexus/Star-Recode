@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Open about:blank or blob → target</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; padding: 2rem; }
+    button { font-size: 1.25rem; padding: .5rem 1rem; margin-right: .5rem; }
+    .note { margin-top: 1rem; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Open demo</h1>
+  <p>
+    Click a button to open the target page using:
+  </p>
+  <ul>
+    <li><strong>1</strong> — opens an about:blank then navigates it to the target.</li>
+    <li><strong>2</strong> — opens a blob URL that immediately redirects to the target.</li>
+  </ul>
+
+  <button id="btn-about">1 (about:blank)</button>
+  <button id="btn-blob">2 (blob)</button>
+
+  <p class="note">Target: <a href="https://starteamnexus.github.io/Star-Recode/g.html" target="_blank" rel="noopener noreferrer">https://starteamnexus.github.io/Star-Recode/g.html</a></p>
+
+  <script>
+    // The URL to open
+    const TARGET = 'https://starteamnexus.github.io/Star-Recode/g.html';
+
+    // Approach 1: open about:blank then navigate it to the target
+    document.getElementById('btn-about').addEventListener('click', () => {
+      // open a new window/tab with about:blank (user gesture)
+      const w = window.open('about:blank');
+      if (!w) {
+        alert('Popup blocked. Please allow popups for this site or Ctrl/Cmd+click the link.');
+        return;
+      }
+      try {
+        // navigate the new window to the target
+        w.location.href = TARGET;
+      } catch (err) {
+        // Some environments may prevent assignment; fallback to creating a link and clicking it
+        const a = document.createElement('a');
+        a.href = TARGET;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.click();
+      }
+    });
+
+    // Approach 2: create a blob containing a small HTML redirect, open the blob URL
+    document.getElementById('btn-blob').addEventListener('click', () => {
+      const html = `<!doctype html>
+<meta charset="utf-8">
+<title>Redirecting…</title>
+<script>
+  // Use replace so the blob page is not kept in history
+  location.replace(${JSON.stringify(TARGET)});
+</script>
+<noscript>
+  <meta http-equiv="refresh" content="0;url=${TARGET}">
+  <p>If you are not redirected automatically, <a href="${TARGET}">click here</a>.</p>
+</noscript>`;
+      const blob = new Blob([html], { type: 'text/html' });
+      const blobUrl = URL.createObjectURL(blob);
+      const w = window.open(blobUrl);
+      if (!w) {
+        // revoke blob to avoid leaking and inform user
+        URL.revokeObjectURL(blobUrl);
+        alert('Popup blocked. Please allow popups for this site or Ctrl/Cmd+click the link.');
+        return;
+      }
+      // Revoke the blob URL after a short delay to free memory
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    });
+  </script>
+</body>
+</html>
