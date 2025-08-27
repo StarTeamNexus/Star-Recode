@@ -6,6 +6,7 @@
     <title>⭐ Star's | V0 | Home</title>
     <link rel="icon" type="image/png" href="Star.png">
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+
     <!--   I am Super Lazy to make a separate file so womp womp   -->
     <link rel="stylesheet" href="CSS/Main.css">
     <style>
@@ -14,7 +15,24 @@
             from {background-color: #333;}
             to {background-color: #555;}
         }
-    
+        @keyframes spinlogo
+        {
+        from {transform: rotate(0deg);}
+        to {transform: rotate(360deg);}
+        }
+@keyframes zoom-in-fade {
+    0% {
+        scale: 0;
+        opacity: 0;
+    }
+    100% {
+        scale: 1;
+        opacity: 1;
+    }
+}
+    ::-webkit-scrollbar {
+    display: none;
+    }
     * {
     text-align: center;
     align-content: center;
@@ -24,12 +42,22 @@
     }
     body {
     background: linear-gradient(150deg, black, gray);
+    font-family: Arial, sans-serif;
     }
     #Credits {
     background: gray;
     border: 10px solid black;
     align-self: center;
     }
+    .navlogo img {
+    height: auto;
+    width: 80px;
+    padding: 0.5em;
+    transition: 0.75s;
+    }
+.navlogo:hover img {
+    animation: shake 5s;
+}
     nav {
     padding: 25px;
     }
@@ -46,13 +74,30 @@
     text-decoration: none;
     margin: 10px;
     font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    }
+    #Logo {
+    height: 160px;
+    width: auto;
+    animation: spinlogo 2s linear infinite;
+    }
+    .Html {
+    animation: zoom-in-fade 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .hidden {
+    display: none !important;
     }
     </style>
 </head>
 <body>
+    <div class="Html">
     <!-- I used Former Builds of Star to make this -->
     <nav>
         <hr />
+        <img src="https://github.com/StarTeamNexus/Star-Recode/blob/main/Star.png?raw=true" alt="The Icon for Star" class="navlogo "/>
         <a href="index.html" target="_blank" rel="noopener noreferrer">Home</a>
         <a href="g.html" target="_blank" rel="noopener noreferrer">Games</a>
         <a href="p.html" target="_blank" rel="noopener noreferrer">Proxy</a>
@@ -60,7 +105,8 @@
         <a href="blogs.html" target="_blank" rel="noopener noreferrer">Blogs</a>
         <hr />
     </nav>
-    <h1><strong>Star</strong></h1>
+    <span><strong>Star</strong></span>
+    <img src="https://github.com/StarTeamNexus/Star-Recode/blob/main/Star.png?raw=true" alt="The Icon for Star" id="Logo" />
     <h3><strong>A powerful yet simple site for bypassing stuff like GoGuardian.</strong></h3>
     <h2> </h2>
     <div id="Credits">
