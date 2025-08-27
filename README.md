@@ -28,4 +28,10 @@ Planned Updates
 - [ X ] Add Multigame lists - Gonna be made with AI, so it might not be made, it will be added when I learn some JS \:skull:
 - [ V ] Improve the Build Selector
 - [ V ] Ensure everything works
-- [ V ] Make a Discord
+- [ V ] Make a Discord and Chatroom
+- [ V } Make the Build Selector
+- [ v ] Improve Secret mode and add stuff for it
+- [ v ] Improve the TamperDetected site
+- [ v ] Make Gtest be for every site when you enter the index.html
+- [ v ] Add the Past Homepage code to make it better
+- [ v ] Improve Antitamper and Websiteclick
