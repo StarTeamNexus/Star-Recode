@@ -79,6 +79,8 @@
     gap: 1rem;
     }
     #Logo {
+    display: block;
+    margin: 0 auto;
     height: 160px;
     width: auto;
     animation: spinlogo 2s linear infinite;
@@ -90,6 +92,14 @@
     .hidden {
     display: none !important;
     }
+    .Title {
+        text-align: center;
+        width:80;
+        font-size: 45px;
+    }
+    .list {
+        text-align: center;
+    }
     </style>
 </head>
 <body>
@@ -97,15 +107,17 @@
     <!-- I used Former Builds of Star to make this -->
     <nav>
         <hr />
+        <ul class="list">
         <img src="https://github.com/StarTeamNexus/Star-Recode/blob/main/Star.png?raw=true" alt="The Icon for Star" class="navlogo "/>
         <a href="index.html" target="_blank" rel="noopener noreferrer">Home</a>
         <a href="g.html" target="_blank" rel="noopener noreferrer">Games</a>
         <a href="p.html" target="_blank" rel="noopener noreferrer">Proxy</a>
-        <a href="chat.html" target="_blank" rel="noopener noreferrer">Chatroom &#40;Might not work&#41;</a>
-        <a href="blogs.html" target="_blank" rel="noopener noreferrer">Blogs</a>
+        <a href="c.html" target="_blank" rel="noopener noreferrer">Chatroom &#40;Might not work&#41;</a>
+        <a href="b.html" target="_blank" rel="noopener noreferrer">Blogs &#40;Soon&#40;</a>
+        </ul>
         <hr />
     </nav>
-    <span><strong>Star</strong></span>
+    <span><strong><h1 class="Title">Star</h1></strong></span>
     <img src="https://github.com/StarTeamNexus/Star-Recode/blob/main/Star.png?raw=true" alt="The Icon for Star" id="Logo" />
     <h3><strong>A powerful yet simple site for bypassing stuff like GoGuardian.</strong></h3>
     <h2> </h2>
