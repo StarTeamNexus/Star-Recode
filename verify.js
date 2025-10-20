@@ -4,11 +4,11 @@
   // === CONFIGURATION ===
   var CONFIG = {
     // Target Settings
-    TARGET_URL: "/h.html", // URL to open after verification 
-    OPEN_IN_BLANK: true, // Open in about:blank embedded page
+    TARGET_URL: "/h.html",
+    OPEN_IN_BLANK: true,
     
     // Page Settings
-    VERIFICATION_PAGE: "h.html", // Only verify on this page
+    VERIFICATION_PAGE: "index.html", // Only verify on index.html
     
     // Extension Detection
     REQUIRED_EXTENSIONS: 1,
@@ -19,13 +19,11 @@
     // Session Management
     SESSION_KEY: "ext-verify-session",
     FINGERPRINT_KEY: "ext-verify-fp",
-    SESSION_DURATION: 24 * 60 * 60 * 1000, // 24 hours
+    SESSION_DURATION: 24 * 60 * 60 * 1000,
     
     // Security Settings 
-    OVERLAY_ID: "ext-verify-overlay",
-    REDIRECT_DELAY: 2000,
     DEVTOOLS_CHECK_INTERVAL: 1000,
-    REVALIDATION_INTERVAL: 5 * 60 * 1000 // Re-check extensions every 5 minutes
+    REVALIDATION_INTERVAL: 5 * 60 * 1000
   };
 
   // === STATE ===
@@ -80,7 +78,6 @@
         return false;
       }
 
-      // Verify fingerprint matches
       var currentFingerprint = generateDeviceFingerprint();
       if (storedFingerprint !== currentFingerprint) {
         clearSession();
@@ -122,27 +119,19 @@
     sessionStorage.removeItem(CONFIG.FINGERPRINT_KEY);
   }
 
-  // Extension validation
   async function revalidateExtensions() {
     STATE.lastValidation = Date.now();
     var count = await detectExtensions();
     if (count < CONFIG.REQUIRED_EXTENSIONS) {
       clearSession();
-      if (!isVerificationPage()) {
-        window.location.reload();
-      }
+      redirectToIndex();
     }
   }
 
-  function isVerificationPage() {
+  function isIndexPage() {
     var path = window.location.pathname;
     var page = path.split('/').pop() || 'index.html';
-    
-    return page === CONFIG.VERIFICATION_PAGE || 
-           page === '' || 
-           page === '/' ||
-           path.endsWith('/' + CONFIG.VERIFICATION_PAGE) ||
-           path === '/' + CONFIG.VERIFICATION_PAGE;
+    return page === 'index.html' || page === '' || page === '/';
   }
 
   // DevTools detection
@@ -154,6 +143,7 @@
     if ((widthThreshold || heightThreshold) && !STATE.devToolsOpen) {
       STATE.devToolsOpen = true;
       clearSession();
+      redirectToIndex();
     }
 
     return widthThreshold || heightThreshold;
@@ -197,138 +187,71 @@
 
   async function detectExtensions() {
     var foundCount = 0;
-    
     for (var i = 0; i < CONFIG.EXTENSION_URLS.length; i++) {
       if (await checkExtensionURL(CONFIG.EXTENSION_URLS[i])) {
         foundCount++;
       }
     }
-    
     return foundCount;
   }
 
-  // UI Creation
-  function createOverlay() {
-    var overlay = document.createElement('div');
-    overlay.id = CONFIG.OVERLAY_ID;
-    
-    var styles = {
-      position: 'fixed',
-      top: '0',
-      left: '0',
-      width: '100%',
-      height: '100%',
-      background: '#000',
-      zIndex: '2147483647',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'Arial, sans-serif',
-      margin: '0',
-      padding: '0',
-      color: '#fff'
-    };
-    
-    Object.assign(overlay.style, styles);
-    
-    // Ensure the overlay covers everything
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    
-    overlay.innerHTML = `
-      <div id="verify-content" style="text-align: center;">
-        <div style="font-size: 24px; margin-bottom: 20px;">Verifying...</div>
-      </div>
-    `;
-    
-    return overlay;
-  }
-
-  function showMessage(message) {
-    var content = document.getElementById('verify-content');
-    if (content) {
-      content.innerHTML = `<div style="font-size: 24px; font-weight: 500;">${message}</div>`;
+  function redirectToIndex() {
+    if (!isIndexPage()) {
+      window.location.href = '/index.html';
     }
   }
 
   function openTargetPage() {
-    showMessage('Access Granted');
-    
-    setTimeout(() => {
-      if (CONFIG.OPEN_IN_BLANK) {
-        var blank = window.open('about:blank', '_blank');
-        if (blank) {
-          blank.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <title>Loading...</title>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                html, body { width: 100%; height: 100%; overflow: hidden; }
-                iframe { 
-                  position: fixed;
-                  top: 0;
-                  left: 0;
-                  width: 100%; 
-                  height: 100%; 
-                  border: none;
-                }
-              </style>
-            </head>
-            <body>
-              <iframe src="${CONFIG.TARGET_URL}" frameborder="0" allowfullscreen></iframe>
-            </body>
-            </html>
-          `);
-          blank.document.close();
-        }
-      } else {
-        window.location.href = CONFIG.TARGET_URL;
+    if (CONFIG.OPEN_IN_BLANK) {
+      var blank = window.open('about:blank', '_blank');
+      if (blank) {
+        blank.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Loading...</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              html, body { width: 100%; height: 100%; overflow: hidden; }
+              iframe { 
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%; 
+                height: 100%; 
+                border: none;
+              }
+            </style>
+          </head>
+          <body>
+            <iframe src="${CONFIG.TARGET_URL}" frameborder="0" allowfullscreen></iframe>
+          </body>
+          </html>
+        `);
+        blank.document.close();
       }
-      
-      setTimeout(() => {
-        var overlay = document.getElementById(CONFIG.OVERLAY_ID);
-        if (overlay) overlay.remove();
-      }, 500);
-    }, 1000);
+    } else {
+      window.location.href = CONFIG.TARGET_URL;
+    }
   }
 
   async function runVerification() {
-    var overlay = createOverlay();
-    document.body.appendChild(overlay);
-
-    // Detect extensions
+    // Silently verify extensions
     STATE.detectedExtensions = await detectExtensions();
     STATE.lastValidation = Date.now();
     
-    if (STATE.detectedExtensions < CONFIG.REQUIRED_EXTENSIONS) {
-      showMessage('Extension Required');
-      return;
+    if (STATE.detectedExtensions >= CONFIG.REQUIRED_EXTENSIONS) {
+      createSession();
+      openTargetPage();
     }
-
-    // Create session and proceed
-    createSession();
-    openTargetPage();
-  }
-
-  function blockAndRedirect() {
-    var overlay = createOverlay();
-    document.body.appendChild(overlay);
-    showMessage('Verification Required');
-
-    setTimeout(() => {
-      window.location.href = CONFIG.VERIFICATION_PAGE;
-    }, CONFIG.REDIRECT_DELAY);
   }
 
   // Initialization
   function initialize() {
     startDevToolsMonitoring();
     
-    // Prevent right-click and shortcuts
     document.addEventListener('contextmenu', function(e) {
       e.preventDefault();
     });
@@ -342,13 +265,15 @@
       }
     });
 
-    if (isVerificationPage()) {
+    if (isIndexPage()) {
+      // On index page, try to verify
       if (!checkSession()) {
         runVerification();
       }
     } else {
+      // On other pages, check session or redirect
       if (!checkSession()) {
-        blockAndRedirect();
+        redirectToIndex();
       }
     }
   }
@@ -360,6 +285,5 @@
     initialize();
   }
 
-  // Prevent modifications
   Object.freeze(CONFIG);
 })();
