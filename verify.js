@@ -19,13 +19,9 @@
     VERIFICATION_PAGE: "index.html", // Only verify on this page
     
     // Extension Detection - Just add Chrome extension URLs
-    REQUIRED_EXTENSIONS: 2, // Now requires 2 extensions
+    REQUIRED_EXTENSIONS: 1, // Now requires 2 extensions
     EXTENSION_URLS: [
-      "chrome-extension://joflmkccibkooplaeoinecjbmdebglab/fonts/Metropolis.css",
-      "chrome-extension://iheobagjkfklnlikgihanlhcddjoihkg/fonts/Metropolis.css",
-      "chrome-extension://lcgajdcbmhepemmlpemkkpgagieehmjp/fonts/Metropolis.css",
-      "chrome-extension://haldlgldplgnggkjaafhelgiaglafanh/youtube_injection.js",
-      "chrome-extension://haldlgldplgnggkjaafhelgiaglafanh/images/icon-128.png"
+      "chrome-extension://dikiaagfielfbnbbopidjjagldjopbpa/js/background.js"
     ],
     
     // Session Management
