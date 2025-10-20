@@ -12,7 +12,7 @@
     ],
     
     // Target Settings
-    TARGET_URL: "https://example.com", // URL to open after verification
+    TARGET_URL: "/h.html", // URL to open after verification
     OPEN_IN_BLANK: true, // Open in about:blank embedded page
     
     // Page Settings
