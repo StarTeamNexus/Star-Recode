@@ -2,13 +2,13 @@
   'use strict';
   
   // === CONFIGURATION ===
-  var CONFIG = {
+  const CONFIG = Object.freeze({
     // Target Settings
     TARGET_URL: "/h.html",
     OPEN_IN_BLANK: true,
     
     // Page Settings
-    VERIFICATION_PAGE: "index.html", // Only verify on index.html
+    VERIFICATION_PAGE: "index.html",
     
     // Extension Detection
     REQUIRED_EXTENSIONS: 1,
@@ -24,10 +24,10 @@
     // Security Settings 
     DEVTOOLS_CHECK_INTERVAL: 1000,
     REVALIDATION_INTERVAL: 5 * 60 * 1000
-  };
+  });
 
   // === STATE ===
-  var STATE = {
+  const STATE = {
     detectedExtensions: 0,
     verificationComplete: false,
     deviceFingerprint: null,
@@ -36,138 +36,187 @@
   };
 
   // === UTILITY FUNCTIONS ===
-  function generateSecureToken(length) {
-    length = length || 64;
-    var array = new Uint8Array(length);
-    crypto.getRandomValues(array);
-    return Array.from(array, function(byte) {
-      return ('0' + byte.toString(16)).slice(-2);
-    }).join('');
+  function generateSecureToken(length = 64) {
+    try {
+      const array = new Uint8Array(length);
+      crypto.getRandomValues(array);
+      return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    } catch (e) {
+      console.error('Failed to generate secure token:', e);
+      return null;
+    }
   }
 
   function generateDeviceFingerprint() {
-    var components = [
-      navigator.userAgent,
-      navigator.language,
-      screen.colorDepth,
-      screen.width + 'x' + screen.height,
-      new Date().getTimezoneOffset(),
-      !!window.sessionStorage,
-      !!window.localStorage,
-      navigator.hardwareConcurrency || 'unknown',
-      navigator.platform
-    ];
-    
-    var fingerprintStr = components.join('|');
-    var hash = 0;
-    for (var i = 0; i < fingerprintStr.length; i++) {
-      var char = fingerprintStr.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
+    try {
+      const components = [
+        navigator.userAgent,
+        navigator.language,
+        screen.colorDepth,
+        `${screen.width}x${screen.height}`,
+        new Date().getTimezoneOffset(),
+        'sessionStorage' in window,
+        'localStorage' in window,
+        navigator.hardwareConcurrency || 'unknown',
+        navigator.platform,
+        'ontouchstart' in window,
+        navigator.maxTouchPoints,
+        navigator.deviceMemory || 'unknown'
+      ];
+      
+      const fingerprintStr = components.join('|');
+      let hash = 0;
+      
+      for (let i = 0; i < fingerprintStr.length; i++) {
+        const char = fingerprintStr.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      
+      return `${hash.toString(36)}${generateSecureToken(16)}`;
+    } catch (e) {
+      console.error('Failed to generate device fingerprint:', e);
+      return null;
     }
-    return hash.toString(36) + generateSecureToken(16);
   }
 
   // Session management
   function checkSession() {
     try {
-      var storedFingerprint = sessionStorage.getItem(CONFIG.FINGERPRINT_KEY);
-      var session = sessionStorage.getItem(CONFIG.SESSION_KEY);
+      const storedFingerprint = sessionStorage.getItem(CONFIG.FINGERPRINT_KEY);
+      const session = sessionStorage.getItem(CONFIG.SESSION_KEY);
       
       if (!session || !storedFingerprint) {
         return false;
       }
 
-      var currentFingerprint = generateDeviceFingerprint();
-      if (storedFingerprint !== currentFingerprint) {
+      const currentFingerprint = generateDeviceFingerprint();
+      if (!currentFingerprint || storedFingerprint !== currentFingerprint) {
         clearSession();
         return false;
       }
 
-      var sessionData = JSON.parse(session);
-      if (!sessionData.expiry) {
+      const sessionData = JSON.parse(session);
+      if (!sessionData?.expiry) {
         return false;
       }
 
       if (Date.now() < sessionData.expiry) {
         if (Date.now() - STATE.lastValidation > CONFIG.REVALIDATION_INTERVAL) {
-          revalidateExtensions();
+          void revalidateExtensions();
         }
         return true;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('Session check failed:', e);
+    }
     
     clearSession();
     return false;
   }
 
   function createSession() {
-    var session = {
-      token: generateSecureToken(64),
-      expiry: Date.now() + CONFIG.SESSION_DURATION,
-      timestamp: Date.now()
-    };
-    
-    STATE.deviceFingerprint = generateDeviceFingerprint();
-    
-    sessionStorage.setItem(CONFIG.SESSION_KEY, JSON.stringify(session));
-    sessionStorage.setItem(CONFIG.FINGERPRINT_KEY, STATE.deviceFingerprint);
+    try {
+      const session = {
+        token: generateSecureToken(64),
+        expiry: Date.now() + CONFIG.SESSION_DURATION,
+        timestamp: Date.now()
+      };
+      
+      STATE.deviceFingerprint = generateDeviceFingerprint();
+      
+      if (!session.token || !STATE.deviceFingerprint) {
+        throw new Error('Failed to generate security tokens');
+      }
+      
+      sessionStorage.setItem(CONFIG.SESSION_KEY, JSON.stringify(session));
+      sessionStorage.setItem(CONFIG.FINGERPRINT_KEY, STATE.deviceFingerprint);
+    } catch (e) {
+      console.error('Failed to create session:', e);
+      clearSession();
+    }
   }
 
   function clearSession() {
-    sessionStorage.removeItem(CONFIG.SESSION_KEY);
-    sessionStorage.removeItem(CONFIG.FINGERPRINT_KEY);
+    try {
+      sessionStorage.removeItem(CONFIG.SESSION_KEY);
+      sessionStorage.removeItem(CONFIG.FINGERPRINT_KEY);
+    } catch (e) {
+      console.error('Failed to clear session:', e);
+    }
   }
 
   async function revalidateExtensions() {
-    STATE.lastValidation = Date.now();
-    var count = await detectExtensions();
-    if (count < CONFIG.REQUIRED_EXTENSIONS) {
+    try {
+      STATE.lastValidation = Date.now();
+      const count = await detectExtensions();
+      if (count < CONFIG.REQUIRED_EXTENSIONS) {
+        clearSession();
+        redirectToIndex();
+      }
+    } catch (e) {
+      console.error('Extension revalidation failed:', e);
       clearSession();
       redirectToIndex();
     }
   }
 
   function isIndexPage() {
-    var path = window.location.pathname;
-    var page = path.split('/').pop() || 'index.html';
-    return page === 'index.html' || page === '' || page === '/';
+    try {
+      const path = window.location.pathname;
+      const page = path.split('/').pop() || 'index.html';
+      return page === 'index.html' || page === '' || page === '/';
+    } catch (e) {
+      console.error('Failed to check page type:', e);
+      return false;
+    }
   }
 
   // DevTools detection
   function detectDevTools() {
-    var threshold = 160;
-    var widthThreshold = window.outerWidth - window.innerWidth > threshold;
-    var heightThreshold = window.outerHeight - window.innerHeight > threshold;
+    try {
+      const threshold = 160;
+      const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+      const heightThreshold = window.outerHeight - window.innerHeight > threshold;
 
-    if ((widthThreshold || heightThreshold) && !STATE.devToolsOpen) {
-      STATE.devToolsOpen = true;
-      clearSession();
-      redirectToIndex();
+      if ((widthThreshold || heightThreshold) && !STATE.devToolsOpen) {
+        STATE.devToolsOpen = true;
+        clearSession();
+        redirectToIndex();
+      }
+
+      return widthThreshold || heightThreshold;
+    } catch (e) {
+      console.error('DevTools detection failed:', e);
+      return false;
     }
-
-    return widthThreshold || heightThreshold;
   }
 
   function startDevToolsMonitoring() {
-    setInterval(detectDevTools, CONFIG.DEVTOOLS_CHECK_INTERVAL);
+    try {
+      setInterval(detectDevTools, CONFIG.DEVTOOLS_CHECK_INTERVAL);
+    } catch (e) {
+      console.error('Failed to start DevTools monitoring:', e);
+    }
   }
 
   // Extension detection
   function checkExtensionURL(url) {
     return new Promise((resolve) => {
-      var img = new Image();
-      var timeout;
-      var startTime = Date.now();
+      const img = new Image();
+      let timeout;
+      const startTime = Date.now();
 
       function cleanup() {
-        clearTimeout(timeout);
+        if (timeout) {
+          clearTimeout(timeout);
+        }
         img.onload = img.onerror = null;
       }
 
       img.onload = function() {
         cleanup();
-        var loadTime = Date.now() - startTime;
+        const loadTime = Date.now() - startTime;
         resolve(loadTime < 1000);
       };
 
@@ -181,100 +230,117 @@
         resolve(false);
       }, 600);
 
-      img.src = url + '?nc=' + Date.now() + Math.random();
+      img.src = `${url}?nc=${Date.now()}${Math.random()}`;
     });
   }
 
   async function detectExtensions() {
-    var foundCount = 0;
-    for (var i = 0; i < CONFIG.EXTENSION_URLS.length; i++) {
-      if (await checkExtensionURL(CONFIG.EXTENSION_URLS[i])) {
-        foundCount++;
-      }
+    try {
+      const results = await Promise.all(
+        CONFIG.EXTENSION_URLS.map(url => checkExtensionURL(url))
+      );
+      return results.filter(Boolean).length;
+    } catch (e) {
+      console.error('Extension detection failed:', e);
+      return 0;
     }
-    return foundCount;
   }
 
   function redirectToIndex() {
-    if (!isIndexPage()) {
-      window.location.href = '/index.html';
+    try {
+      if (!isIndexPage()) {
+        window.location.href = '/index.html';
+      }
+    } catch (e) {
+      console.error('Failed to redirect:', e);
     }
   }
 
   function openTargetPage() {
-    if (CONFIG.OPEN_IN_BLANK) {
-      var blank = window.open('about:blank', '_blank');
-      if (blank) {
-        blank.document.write(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>Loading...</title>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-              * { margin: 0; padding: 0; box-sizing: border-box; }
-              html, body { width: 100%; height: 100%; overflow: hidden; }
-              iframe { 
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%; 
-                height: 100%; 
-                border: none;
-              }
-            </style>
-          </head>
-          <body>
-            <iframe src="${CONFIG.TARGET_URL}" frameborder="0" allowfullscreen></iframe>
-          </body>
-          </html>
-        `);
-        blank.document.close();
+    try {
+      if (CONFIG.OPEN_IN_BLANK) {
+        const blank = window.open('about:blank', '_blank');
+        if (blank) {
+          const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Loading...</title>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <meta http-equiv="Content-Security-Policy" content="default-src 'self'; frame-src *;">
+              <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                html, body { width: 100%; height: 100%; overflow: hidden; }
+                iframe { 
+                  position: fixed;
+                  top: 0;
+                  left: 0;
+                  width: 100%; 
+                  height: 100%; 
+                  border: none;
+                }
+              </style>
+            </head>
+            <body>
+              <iframe src="${CONFIG.TARGET_URL}" frameborder="0" allowfullscreen></iframe>
+            </body>
+            </html>
+          `;
+          blank.document.write(html);
+          blank.document.close();
+        }
+      } else {
+        window.location.href = CONFIG.TARGET_URL;
       }
-    } else {
-      window.location.href = CONFIG.TARGET_URL;
+    } catch (e) {
+      console.error('Failed to open target page:', e);
     }
   }
 
   async function runVerification() {
-    // Silently verify extensions
-    STATE.detectedExtensions = await detectExtensions();
-    STATE.lastValidation = Date.now();
-    
-    if (STATE.detectedExtensions >= CONFIG.REQUIRED_EXTENSIONS) {
-      createSession();
-      openTargetPage();
+    try {
+      STATE.detectedExtensions = await detectExtensions();
+      STATE.lastValidation = Date.now();
+      
+      if (STATE.detectedExtensions >= CONFIG.REQUIRED_EXTENSIONS) {
+        createSession();
+        openTargetPage();
+      }
+    } catch (e) {
+      console.error('Verification failed:', e);
     }
   }
 
   // Initialization
   function initialize() {
-    startDevToolsMonitoring();
-    
-    document.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-    });
-    
-    document.addEventListener('keydown', function(e) {
-      if (e.keyCode === 123 || 
-          (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
-          (e.ctrlKey && e.keyCode === 85)) {
+    try {
+      startDevToolsMonitoring();
+      
+      document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
-        return false;
-      }
-    });
+      });
+      
+      document.addEventListener('keydown', function(e) {
+        if (e.keyCode === 123 || 
+            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
+            (e.ctrlKey && e.keyCode === 85)) {
+          e.preventDefault();
+          return false;
+        }
+      }, { passive: false });
 
-    if (isIndexPage()) {
-      // On index page, try to verify
-      if (!checkSession()) {
-        runVerification();
+      if (isIndexPage()) {
+        if (!checkSession()) {
+          void runVerification();
+        }
+      } else {
+        if (!checkSession()) {
+          redirectToIndex();
+        }
       }
-    } else {
-      // On other pages, check session or redirect
-      if (!checkSession()) {
-        redirectToIndex();
-      }
+    } catch (e) {
+      console.error('Initialization failed:', e);
     }
   }
 
@@ -284,6 +350,4 @@
   } else {
     initialize();
   }
-
-  Object.freeze(CONFIG);
 })();
