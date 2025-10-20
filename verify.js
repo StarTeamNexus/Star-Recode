@@ -2,7 +2,10 @@
   'use strict';
   
   const CONFIG = {
-    TARGET_URL: "/h.html",
+    // Base path for the GitHub Pages site
+    BASE_PATH: '/Star-Recode',
+    // Target URL (relative to BASE_PATH)
+    TARGET_URL: "/Star-Recode/h.html",
     OPEN_IN_BLANK: true,
     REQUIRED_EXTENSIONS: 1,
     EXTENSION_URLS: [
@@ -71,6 +74,11 @@
         return false;
       }
 
+      // Revalidate if needed
+      if (Date.now() - STATE.lastValidation > CONFIG.REVALIDATION_INTERVAL) {
+        setTimeout(() => runVerification(), 0);
+      }
+
       return true;
     } catch (e) {
       return false;
@@ -131,12 +139,14 @@
   // Page Navigation
   function isIndexPage() {
     const path = location.pathname;
-    return path === '/' || path === '/index.html' || path === '';
+    return path === CONFIG.BASE_PATH + '/' || 
+           path === CONFIG.BASE_PATH + '/index.html' || 
+           path === CONFIG.BASE_PATH;
   }
 
   function goToIndex() {
     if (!isIndexPage()) {
-      location.href = '/index.html';
+      location.href = CONFIG.BASE_PATH + '/index.html';
     }
   }
 
@@ -150,13 +160,14 @@
             <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width">
+              <base href="${location.origin}${CONFIG.BASE_PATH}/">
               <style>
-                body, html { margin: 0; padding: 0; height: 100%; }
-                iframe { border: 0; width: 100%; height: 100%; }
+                body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+                iframe { border: 0; width: 100%; height: 100%; position: fixed; top: 0; left: 0; }
               </style>
             </head>
             <body>
-              <iframe src="${CONFIG.TARGET_URL}"></iframe>
+              <iframe src="${CONFIG.TARGET_URL}" allowfullscreen></iframe>
             </body>
           </html>
         `);
@@ -198,6 +209,23 @@
         return false;
       }
     });
+
+    // Additional protection
+    window.addEventListener('devtoolschange', function(e) {
+      if (e.detail.isOpen) {
+        clearSession();
+        location.reload();
+      }
+    });
+
+    // Disable debugging functions
+    const disableDebugging = function() {
+      if (window.console && window.console.firebug) {
+        clearSession();
+        location.reload();
+      }
+    };
+    setInterval(disableDebugging, 1000);
   }
 
   // Initialization
